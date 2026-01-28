@@ -9,3 +9,12 @@ API-only backend with authentication, employee management, and salary metrics.
 - Go
 - PostgreSQL
 - JWT Authentication
+
+## API Versioning
+
+All APIs will be exposed under a versioned base path.
+
+Current version:
+- v1 → `/api/v1`
+
+This allows future iterations without breaking existing clients.
