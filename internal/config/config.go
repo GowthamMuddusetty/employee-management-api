@@ -16,6 +16,8 @@ type Config struct {
 	JWTExpiry  time.Duration `json:"jwt_expiry"`
 }
 
+var Cfg Config
+
 func Load() (*Config, error) {
 	jwtExpiryStr := getEnv("JWT_EXPIRY")
 
@@ -24,7 +26,7 @@ func Load() (*Config, error) {
 		return nil, errors.New("invalid JWT_EXPIRY format")
 	}
 
-	cfg := &Config{
+	Cfg = Config{
 		DBHost:     getEnv("DB_HOST"),
 		DBPort:     getEnv("DB_PORT"),
 		DBName:     getEnv("DB_NAME"),
@@ -34,17 +36,17 @@ func Load() (*Config, error) {
 		JWTExpiry:  jwtExpiry,
 	}
 
-	if cfg.DBHost == "" ||
-		cfg.DBPort == "" ||
-		cfg.DBName == "" ||
-		cfg.DBUser == "" ||
-		cfg.DBPassword == "" ||
-		cfg.JWTSecret == "" ||
+	if Cfg.DBHost == "" ||
+		Cfg.DBPort == "" ||
+		Cfg.DBName == "" ||
+		Cfg.DBUser == "" ||
+		Cfg.DBPassword == "" ||
+		Cfg.JWTSecret == "" ||
 		jwtExpiryStr == "" {
 		return nil, errors.New("missing required environment variables")
 	}
 
-	return cfg, nil
+	return &Cfg, nil
 }
 
 func getEnv(key string) string {
