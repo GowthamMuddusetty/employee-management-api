@@ -28,11 +28,15 @@ func main() {
 
 	employeeRepo := repositories.NewEmployeeRepository(postgresDB.Pool)
 	employeeService := services.NewEmployeeService(employeeRepo)
+	metricsRepo := repositories.NewSalaryMetricsRepository(postgresDB.Pool)
 
 	userRepo := repositories.NewUserRepository(postgresDB.Pool)
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
 	authHandler := handlers.NewAuthHandler(authService)
 	employeeHandler := handlers.NewEmployeeHandler(employeeService)
+	salaryHandler := handlers.NewSalaryHandler(employeeService)
+	metricsService := services.NewSalaryMetricsService(metricsRepo)
+	metricsHandler := handlers.NewSalaryMetricsHandler(metricsService)
 
 	r := gin.Default()
 
@@ -52,6 +56,14 @@ func main() {
 			employees.GET("/:id", employeeHandler.GetByID)
 			employees.PUT("/:id", employeeHandler.Update)
 			employees.DELETE("/:id", employeeHandler.Delete)
+			employees.GET("/:id/salary", salaryHandler.GetSalary)
+		}
+
+		metrics := v1.Group("/metrics")
+		metrics.Use(middleware.GinAuthMiddleware(cfg.JWTSecret))
+		{
+			metrics.GET("/salary/country/:country", metricsHandler.ByCountry)
+			metrics.GET("/salary/job-title/:jobTitle", metricsHandler.AvgByJobTitle)
 		}
 	}
 
