@@ -6,6 +6,7 @@ import (
 	"github.com/GowthamMuddusetty/employee-management-api/internal/config"
 	"github.com/GowthamMuddusetty/employee-management-api/internal/db"
 	"github.com/GowthamMuddusetty/employee-management-api/internal/handlers"
+	"github.com/GowthamMuddusetty/employee-management-api/internal/middleware"
 	"github.com/GowthamMuddusetty/employee-management-api/internal/repositories"
 	"github.com/GowthamMuddusetty/employee-management-api/internal/services"
 	"github.com/gin-gonic/gin"
@@ -25,9 +26,13 @@ func main() {
 	}
 	defer postgresDB.Pool.Close()
 
+	employeeRepo := repositories.NewEmployeeRepository(postgresDB.Pool)
+	employeeService := services.NewEmployeeService(employeeRepo)
+
 	userRepo := repositories.NewUserRepository(postgresDB.Pool)
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
 	authHandler := handlers.NewAuthHandler(authService)
+	employeeHandler := handlers.NewEmployeeHandler(employeeService)
 
 	r := gin.Default()
 
@@ -37,6 +42,16 @@ func main() {
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+		}
+
+		employees := v1.Group("/employees")
+		employees.Use(middleware.GinAuthMiddleware(cfg.JWTSecret))
+		{
+			employees.POST("", employeeHandler.Create)
+			employees.GET("", employeeHandler.List)
+			employees.GET("/:id", employeeHandler.GetByID)
+			employees.PUT("/:id", employeeHandler.Update)
+			employees.DELETE("/:id", employeeHandler.Delete)
 		}
 	}
 
