@@ -37,17 +37,17 @@ This allows future iterations without breaking existing clients.
 
 ---
 
-### Database Setup
+## Database & Application Setup (Docker)
 
-PostgreSQL is run locally using Docker Compose.
+Both PostgreSQL and the API can be run using Docker Compose.
 
-Start PostgreSQL:
+### Start services
 
 ```bash
-docker compose up -d
+docker compose up --build -d
 ```
 
-Ensure the database container is running before starting the application.
+Docker Compose starts both the database and API services together.
 
 ## Database Migrations
 
@@ -67,12 +67,12 @@ migrate -path internal/migrations \
 ### Run migrations using Docker (recommended)
 
 ```bash
-docker run --rm \
-  --network employee-management-api_default \
-  -v $(pwd)/internal/migrations:/migrations \
-  migrate/migrate \
-  -path /migrations \
-  -database "postgres://user:secret@employee_management_postgres:5432/emp_management?sslmode=disable" \
+docker run --rm `
+  --network employee-management-api_default `
+  -v ${PWD}\internal\migrations:/migrations `
+  migrate/migrate `
+  -path /migrations `
+  -database "postgres://user:secret@employee_management_postgres:5432/emp_management?sslmode=disable" `
   up
 ```
 
